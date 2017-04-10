@@ -1,7 +1,7 @@
-FROM ruby:2.4.1-slim
+FROM ruby:2.4.1
 RUN apt-get update -qq && apt-get install -y build-essential
 
-ENV APP_ROOT /var/www/reversin
+ENV APP_ROOT /var/www/reversible
 RUN mkdir -p $APP_ROOT
 WORKDIR $APP_ROOT
 ADD Gemfile* $APP_ROOT/
