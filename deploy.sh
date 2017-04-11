@@ -13,7 +13,6 @@ configure_aws_cli(){
 deploy_image() {
     # get the authorization code and login to aws ecr
     eval $(aws ecr get-login --region us-east-1)
-    docker tag reversible:$CIRCLE_SHA1 $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
     docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
 }
 
