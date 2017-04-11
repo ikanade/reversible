@@ -5,12 +5,12 @@ machine:
     - docker
 checkout:
   post:
-    - chmod +x ./deploy.sh
+    - chmod +x ./ecs_deploy_script
 
 dependencies:
   override:
     - $(aws ecr get-login --region us-east-1)
-    - docker build -t reversible .
+    - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1 .
 
 test:
   post:
@@ -20,6 +20,5 @@ deployment:
   prod:
     branch: master ## do deployment on commit to the master branch only 
     commands:
-      - docker tag -f reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
-      - ./deploy.sh
+      - ./ecs_deploy_script -c reversible-cluster -n reversible-service -i $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1 -k $AWS_ACCESS_KEY -s $AWS_SECRET_KEY -r us-east-1
