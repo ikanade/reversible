@@ -21,6 +21,7 @@ make_task_def() {
     task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $CIRCLE_SHA1)
     echo "$task_def"
 }
+
 register_definition() {
 
     if revision=$(aws ecs register-task-definition --cli-input-json "$task_def" --family $family | $JQ '.taskDefinition.taskDefinitionArn'); then
