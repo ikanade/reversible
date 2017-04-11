@@ -41,7 +41,7 @@ deploy_cluster() {
 make_task_def(){
 	task_template='[
 		{
-			"name": "reversible",
+			"name": "reversible-app",
 			"image": "%s.dkr.ecr.us-east-1.amazonaws.com/reversible:%s",
 			"essential": true,
 			"memory": 200,
