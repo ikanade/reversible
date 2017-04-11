@@ -1,0 +1,22 @@
+machine:
+  ruby:
+    version: 2.4.1
+  services:
+    - docker
+dependencies:
+  pre:
+    - gem install --no-ri --no-rdoc ufo
+  override:
+    - cp .env.example .env
+database:
+  override:
+    - cat /dev/null
+test:
+  override:
+    - ufo docker build
+    - docker tag $(ufo docker image_name) reversible-webapp
+deployment:
+ staging:
+   branch: master
+   commands:
+     - ufo ship reversible-webapp --cluster default --no-docker --no-wait
