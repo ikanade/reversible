@@ -20,8 +20,6 @@ deployment:
   prod:
     branch: master ## do deployment on commit to the master branch only 
     commands:
-      - docker tag reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
-      - docker tag reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:latest
+      - docker tag -f reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:latest
       - ./deploy.sh
