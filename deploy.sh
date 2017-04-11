@@ -16,27 +16,11 @@ deploy_image() {
     docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
 }
 
-make_task_def(){
-    task_template='[
-        {
-            "name": "reversible-app",
-            "image": "%s.dkr.ecr.us-east-1.amazonaws.com/reversible:%s",
-            "essential": true,
-            "memory": 300,
-            "cpu": 1,
-            "portMappings": [
-                {
-                    "containerPort": "80",
-                    "hostPort": "80",
-                    "protocol": "tcp"
-                }
-            ]
-        }
-    ]'
-    
+make_task_def() {
+    task_template=$(cat ecs_task_definition.json)
     task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $CIRCLE_SHA1)
+    echo "$task_def"
 }
-
 register_definition() {
 
     if revision=$(aws ecs register-task-definition --cli-input-json "$task_def" --family $family | $JQ '.taskDefinition.taskDefinitionArn'); then
