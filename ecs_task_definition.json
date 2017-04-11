@@ -2,7 +2,7 @@
   "family": "reversible-task-family", 
   "containerDefinitions": [
   {
-    "name": "reversible-app", 
+    "name": "reversible", 
     "image": "%s.dkr.ecr.us-east-1.amazonaws.com/reversible:%s", 
     "cpu": 1, 
     "memory": 300, 
