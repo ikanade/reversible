@@ -13,8 +13,8 @@ dependencies:
     - docker build -t reversible .
 
 test:
-  override:
-    ## - docker run -e RAILS_ENV=test -it my-website rake test
+  post:
+    - docker run -d -p 4000:80 $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1; sleep 10
 
 deployment:
   prod:

@@ -7,7 +7,7 @@ require 'active_support/all'
 class App < Sinatra::Base
 
   get '/'do 
-    "Psst! You are allowed here."
+    "Psst! You are not allowed here."
   end
 
   get '/reverse' do 
