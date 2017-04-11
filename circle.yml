@@ -4,19 +4,16 @@ machine:
   services:
     - docker
 dependencies:
-  pre:
-    - gem install --no-ri --no-rdoc ufo
-  override:
-    - cp .env.example .env
-database:
-  override:
-    - cat /dev/null
+  post:
+    - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1 .
+
 test:
-  override:
-    - ufo docker build
-    - docker tag $(ufo docker image_name) reversible-webapp
+  post:
+    - docker run -d -p 4000:80 --name reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1; sleep 10
+    - curl --retry 10 --retry-delay 5 localhost:4000 | grep "Psst! You are not allowed here."
+
 deployment:
- staging:
-   branch: master
-   commands:
-     - ufo ship reversible-webapp --cluster default --no-docker --no-wait
+  prod:
+    branch: master
+    commands:
+      - ./deploy.sh
