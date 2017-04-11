@@ -1,0 +1,3 @@
+image: reversible
+service_cluster:
+  default: reversible-cluster # default cluster

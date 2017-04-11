@@ -15,6 +15,7 @@ deploy_cluster() {
 
     make_task_def
     register_definition
+    
     if [[ $(aws ecs update-service --cluster reversible-cluster --service reversible-service --task-definition $revision | \
                    $JQ '.service.taskDefinition') != $revision ]]; then
         echo "Error updating service."
@@ -23,8 +24,19 @@ deploy_cluster() {
 
     # wait for older revisions to disappear
     # not really necessary, but nice for demos
-    aws ecs wait services-stable --cluster reversible-cluster --services reversible-service
-    return $?
+    for attempt in {1..30}; do
+        if stale=$(aws ecs describe-services --cluster reversible-cluster --services reversible-service | \
+                       $JQ ".services[0].deployments | .[] | select(.taskDefinition != \"$revision\") | .taskDefinition"); then
+            echo "Waiting for stale deployments:"
+            echo "$stale"
+            sleep 5
+        else
+            echo "Deployed!"
+            return 0
+        fi
+    done
+    echo "Service update took too long."
+    return 1
 }
 
 make_task_def(){
