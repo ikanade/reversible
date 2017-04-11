@@ -21,4 +21,4 @@ deployment:
     branch: master ## do deployment on commit to the master branch only 
     commands:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
-      - ./ecs_deploy_script -c reversible-cluster -n reversible-service -i $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1 -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r us-east-1 -m 50 -v
+      - ./ecs_deploy_script -c reversible-cluster -n reversible-service -i $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1 -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r us-east-1 -m 100 -v
