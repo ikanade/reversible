@@ -8,17 +8,20 @@ checkout:
     - chmod +x ./deploy.sh
 
 dependencies:
-  post:
-    - sudo apt-get update && sudo apt-get install jq
-    - curl -L -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5rc1/jq-linux-x86_64-static && chmod +x ~/bin/jq
-    - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1 . | cat
+  override:
+    - $(aws ecr get-login --region us-east-1)
+    - docker build -t reversible .
 
 test:
-  post:
-    - docker run -d -p 4000:80 $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1; sleep 10
+  override:
+    ## - docker run -e RAILS_ENV=test -it my-website rake test
 
 deployment:
   prod:
-    branch: master
+    branch: master ## do deployment on commit to the master branch only 
     commands:
+      - docker tag reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
+      - docker tag reversible $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:latest
       - ./deploy.sh

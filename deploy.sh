@@ -1,71 +1,26 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -e
-
-JQ="jq --raw-output --exit-status"
+SERVICE_NAME=reversible-service
+CLUSTER_NAME=reversible-cluster
+BUILD_NUMBER=${CIRCLE_BUILD_NUM}
+IMAGE_TAG=${CIRCLE_SHA1}
+TASK_FAMILY=reversible-task-family
 
 configure_aws_cli(){
     aws --version
     aws configure set default.region us-east-1
     aws configure set default.output json
 }
-
-deploy_image() {
-    # get the authorization code and login to aws ecr
-    eval $(aws ecr get-login --region us-east-1)
-    docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/reversible:$CIRCLE_SHA1
-}
-
-make_task_def() {
-    task_template=$(cat ecs_task_definition.json)
-    task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $CIRCLE_SHA1)
-    echo "$task_def"
-}
-
-register_definition() {
-
-    if revision=$(aws ecs register-task-definition --cli-input-json "$task_def" --family $family | $JQ '.taskDefinition.taskDefinitionArn'); then
-        echo "Revision: $revision"
-    else
-        echo "Failed to register task definition"
-        return 1
-    fi
-
-}
-
-deploy_cluster() {
-    
-    
-    make_task_def
-    register_definition
-    
-
-    if [[ $(aws ecs update-service --cluster $cluster_name --service $service_name --task-definition $revision | \
-                   $JQ '.service.taskDefinition') != $revision ]]; then
-        echo "Error updating service."
-        return 1
-    fi
-
-    for attempt in {1..30}; do
-        if stale=$(aws ecs describe-services --cluster $cluster_name --services $service_name | \
-                       $JQ ".services[0].deployments | .[] | select(.taskDefinition != \"$revision\") | .taskDefinition"); then
-            echo "Waiting for stale deployments:"
-            echo "$stale"
-            sleep 5
-        else
-            echo "Deployed!"
-            return 0
-        fi
-    done
-    echo "Service update took too long."
-    return 1
-
-}
-
-family=reversible-task-family
-service_name=reversible-service
-cluster_name=reversible-cluster
-
 configure_aws_cli
-deploy_image
-deploy_cluster
+# Create a new task definition for this build
+sed -e "s;%IMAGE_TAG%;${IMAGE_TAG};g" ecs_task_definition.json > reversible-${BUILD_NUMBER}.json
+aws ecs register-task-definition --family ${TASK_FAMILY} --cli-input-json file://reversible-${BUILD_NUMBER}.json
+
+# Update the service with the new task definition and desired count
+TASK_REVISION=`aws ecs describe-task-definition --task-definition ${TASK_FAMILY} | egrep "revision" | tr "/" " " | awk '{print $2}' | sed 's/"$//'`
+DESIRED_COUNT=`aws ecs describe-services --cluster ${CLUSTER_NAME} --services ${SERVICE_NAME} | egrep "desiredCount" | head -1 | tr "/" " " | awk '{print $2}' | sed 's/,$//'`
+if [ ${DESIRED_COUNT} = "0" ]; then
+    DESIRED_COUNT="1"
+fi
+
+aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_FAMILY}:${TASK_REVISION} --desired-count ${DESIRED_COUNT}
