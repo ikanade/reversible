@@ -7,7 +7,7 @@ require 'active_support/all'
 class App < Sinatra::Base
 
   get '/'do 
-    "Welcome to the reversible. Stay tuned for more."
+    "Welcome to the reversible."
   end
 
   get '/reverse' do 
