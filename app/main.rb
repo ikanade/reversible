@@ -1,10 +1,4 @@
-require 'bundler/setup'
-
-Bundler.require(:default, :test, :development)
-
-require 'active_support/all'
-
-class App < Sinatra::Base
+class Reversible < Sinatra::Base
 
   get '/'do 
     "Welcome to Reversible"

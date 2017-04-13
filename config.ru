@@ -1,3 +1,4 @@
 $:.unshift(File.dirname(__FILE__))
-require 'app'
-run App
+require './config/environment'
+require './app/main.rb'
+run Reversible
