@@ -5,7 +5,7 @@ machine:
     - docker
 checkout:
   post:
-    - chmod +x ./ecs_deploy_script
+    - chmod +x ./config/deployment/ecs_deploy_script
 
 dependencies:
   override:
