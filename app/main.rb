@@ -1,7 +1,7 @@
 class Reversible < Sinatra::Base
 
   get '/'do 
-    "Welcome to Reversible"
+    "Welcome to Reversible, now with a test suit. Yaay!"
   end
 
   get '/reverse' do 
