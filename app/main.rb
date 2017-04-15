@@ -1,7 +1,7 @@
 class Reversible < Sinatra::Base
 
   get '/'do 
-    "Welcome to Reversible, now with a test suit. Yaay!"
+    "Welcome to Reversible."
   end
 
   get '/reverse' do 
@@ -33,7 +33,7 @@ class Reversible < Sinatra::Base
   end
 
   error 422 do
-    {"error": "Provide a valid Input string"}.to_json
+    { "error": "Provide a valid Input string" }.to_json
   end
 
 end
